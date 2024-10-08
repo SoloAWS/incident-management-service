@@ -1,0 +1,36 @@
+name: Deploy Incident Management Service
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build the Docker image
+        run: |
+          IMAGE_TAG=$(echo $GITHUB_SHA)
+          docker build -t ${{ secrets.AWS_ECR_URI }}:${IMAGE_TAG} .
+
+      - name: Push the Docker image to Amazon ECR
+        run: |
+          IMAGE_TAG=$(echo $GITHUB_SHA)
+          docker tag ${{ secrets.AWS_ECR_URI }}:${IMAGE_TAG} ${{ secrets.AWS_ECR_URI }}:latest
+          docker push ${{ secrets.AWS_ECR_URI }}:${IMAGE_TAG}
+          docker push ${{ secrets.AWS_ECR_URI }}:latest
+
+      - name: Deploy to ECS
+        run: |
+          CLUSTER_NAME="IncidentManagementCluster"
+          SERVICE_NAME="IncidentManagementService"
+          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
