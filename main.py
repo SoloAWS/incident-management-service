@@ -8,7 +8,7 @@ async def incident_management_root():
 
 @app.get("/incident-management/health")
 async def health():
-    return {"status": "OK"}
+    return {"status": "OK", "Bajo": "presion"}
 
 if __name__ == "__main__":
     import uvicorn
