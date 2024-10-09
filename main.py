@@ -1,13 +1,12 @@
-# incident-management-service\main.py
 from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/")
-async def root():
+@app.get("/incident-management")
+async def incident_management_root():
     return {"message": "Incident Management Hello World"}
 
-@app.get("/health")
+@app.get("/incident-management/health")
 async def health():
     return {"status": "OK"}
 
