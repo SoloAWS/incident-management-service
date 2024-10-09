@@ -38,6 +38,6 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          CLUSTER_NAME="IncidentManagementCluster"
-          SERVICE_NAME="IncidentManagementService"
+          CLUSTER_NAME="CdkBackendStack-IncidentManagementCluster7F16C094-SNesgGTjrTAI"
+          SERVICE_NAME="CdkBackendStack-IncidentManagementService90420D4B-ZaugNcyuyOt8"
           aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
