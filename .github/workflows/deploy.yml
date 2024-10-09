@@ -33,7 +33,6 @@ jobs:
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
           docker tag ${{ secrets.AWS_ECR_URI }}:${IMAGE_TAG} ${{ secrets.AWS_ECR_URI }}:latest
-          docker push ${{ secrets.AWS_ECR_URI }}:${IMAGE_TAG}
           docker push ${{ secrets.AWS_ECR_URI }}:latest
 
       - name: Deploy to ECS
