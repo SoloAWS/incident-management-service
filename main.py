@@ -6,7 +6,7 @@ app = FastAPI()
 
 @app.get("/incident-management")
 async def incident_management_root():
-    return {"message": "Incident Management Hello World"}
+    return {"message": "Incident Management Nueva cuenta"}
 
 @app.get("/incident-management/health")
 async def health():
