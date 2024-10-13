@@ -37,6 +37,4 @@ jobs:
 
       - name: Deploy to ECS
         run: |
-          CLUSTER_NAME="ECSStack-ClusterEB0386A7-tclP291aq31D"
-          SERVICE_NAME="ECSStack-incidentmanagementService14BAA67D-cRg80jLqv3Yl"
-          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --force-new-deployment
