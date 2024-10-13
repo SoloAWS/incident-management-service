@@ -10,11 +10,11 @@ class Incident(BaseModel):
 
 @app.get("/incident-management")
 async def incident_management_root():
-    return {"message": "Incident Management Nueva cuenta"}
+    return {"message": "Incident Management"}
 
 @app.get("/incident-management/health")
 async def health():
-    return {"status": "OK"}
+    return {"status": "OK Python 1"}
 
 @app.post("/incident-management/incidents")
 async def create_incident(incident: Incident):
