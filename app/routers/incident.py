@@ -28,7 +28,7 @@ def create_incident_in_database(incident_data: dict, token: str):
     api_url = INCIDENT_SERVICE_COMMAND_URL
     endpoint = "/"
     headers = {
-        "Authorization": f"Bearer {token}",
+        "token": f"{token}",
         "Content-Type": "application/json"
     }
     response = requests.post(f"{api_url}{endpoint}", headers=headers, json=incident_data)
@@ -38,7 +38,7 @@ def create_incident_in_database_user(incident_data: dict, token: str, file: Opti
     api_url = INCIDENT_SERVICE_COMMAND_URL
     endpoint = "/"
     headers = {
-        "Authorization": f"Bearer {token}",
+        "token": f"{token}",
     }
     
     files = None
@@ -71,7 +71,7 @@ async def create_incident(
     channel: IncidentChannel = Form(IncidentChannel.MOBILE),
     priority: IncidentPriority = Form(IncidentPriority.MEDIUM),
     file: Optional[UploadFile] = File(None),
-    current_user: dict = Depends(get_current_user)
+    #current_user: dict = Depends(get_current_user)
 ):
     incident_data = CreateIncidentRequest(
         user_id=user_id,
@@ -82,9 +82,9 @@ async def create_incident(
         priority=priority
     )
 
-    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
     
-    response_data, status_code = create_incident_in_database_user(incident_data.dict(), token, file)
+    response_data, status_code = create_incident_in_database_user(incident_data.dict(), 'token', file)
     
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
