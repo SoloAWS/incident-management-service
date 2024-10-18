@@ -1,9 +1,12 @@
 # incident.py (router)
-from fastapi import APIRouter, Depends, HTTPException, Header
-from ..schemas.incident import UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse
+from uuid import UUID
+from fastapi import APIRouter, Depends, HTTPException, Header, File, UploadFile, Form
+from ..schemas.incident import IncidentChannel, IncidentPriority, IncidentState, UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse
 import jwt
 import requests
 import os
+import json
+from typing import Optional
 
 router = APIRouter(prefix="/incident-management", tags=["Incidents"])
 
@@ -31,6 +34,20 @@ def create_incident_in_database(incident_data: dict, token: str):
     response = requests.post(f"{api_url}{endpoint}", headers=headers, json=incident_data)
     return response.json(), response.status_code
 
+def create_incident_in_database_user(incident_data: dict, token: str, file: Optional[UploadFile] = None):
+    api_url = INCIDENT_SERVICE_COMMAND_URL
+    endpoint = "/"
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    
+    files = None
+    if file:
+        files = {"file": (file.filename, file.file, file.content_type)}
+    
+    response = requests.post(f"{api_url}{endpoint}", headers=headers, json=incident_data, files=files)
+    return response.json(), response.status_code
+
 @router.post("/", response_model=CreateIncidentResponse, status_code=201)
 async def create_incident(
     incident: CreateIncidentRequest,
@@ -39,6 +56,35 @@ async def create_incident(
     token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
     incident_data = incident.dict()
     response_data, status_code = create_incident_in_database(incident_data, token)
+    
+    if status_code != 201:
+        raise HTTPException(status_code=status_code, detail=response_data)
+    
+    return CreateIncidentResponse(**response_data)
+
+@router.post("/user-incident", response_model=CreateIncidentResponse, status_code=201)
+async def create_incident(
+    user_id: UUID = Form(...),
+    company_id: UUID = Form(...),
+    description: str = Form(...),
+    state: IncidentState = Form(IncidentState.OPEN),
+    channel: IncidentChannel = Form(IncidentChannel.MOBILE),
+    priority: IncidentPriority = Form(IncidentPriority.MEDIUM),
+    file: Optional[UploadFile] = File(None),
+    current_user: dict = Depends(get_current_user)
+):
+    incident_data = CreateIncidentRequest(
+        user_id=user_id,
+        company_id=company_id,
+        description=description,
+        state=state,
+        channel=channel,
+        priority=priority
+    )
+
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    
+    response_data, status_code = create_incident_in_database_user(incident_data.dict(), token, file)
     
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
