@@ -36,16 +36,30 @@ def create_incident_in_database(incident_data: dict, token: str):
 
 def create_incident_in_database_user(incident_data: dict, token: str, file: Optional[UploadFile] = None):
     api_url = INCIDENT_SERVICE_COMMAND_URL
-    endpoint = "/"
+    endpoint = "/user-incident"
     headers = {
         "token": f"{token}",
+    }
+    
+     # Convert UUID to strings
+    incident_data['user_id'] = str(incident_data['user_id'])
+    incident_data['company_id'] = str(incident_data['company_id'])
+    
+    # Prepare form data
+    form_data = {
+        "user_id": incident_data['user_id'],
+        "company_id": incident_data['company_id'],
+        "description": incident_data['description'],
+        "state": incident_data['state'],
+        "channel": incident_data['channel'],
+        "priority": incident_data['priority']
     }
     
     files = None
     if file:
         files = {"file": (file.filename, file.file, file.content_type)}
     
-    response = requests.post(f"{api_url}{endpoint}", headers=headers, json=incident_data, files=files)
+    response = requests.post(f"{api_url}{endpoint}", headers=headers, data=form_data, files=files)
     return response.json(), response.status_code
 
 @router.post("/", response_model=CreateIncidentResponse, status_code=201)
