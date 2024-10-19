@@ -80,8 +80,8 @@ async def create_incident(
 
 @router.post("/user-incident", response_model=CreateIncidentResponse, status_code=201)
 async def create_incident(
-    user_id: UUID = Form(...),
-    company_id: UUID = Form(...),
+    user_id: str = Form(...),
+    company_id: str = Form(...),
     description: str = Form(...),
     state: str = Form(IncidentState.OPEN.value),
     channel: str = Form(IncidentChannel.MOBILE.value),
