@@ -105,7 +105,6 @@ def test_create_incident_invalid_input():
     response = client.post(
         "/incident-management/",
         json={
-            "user_id": "Invalid",
             "company_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
             "description": "Sample incident description 4",
             "state": "open",
@@ -132,8 +131,8 @@ async def test_create_incident_function(mock_create_incident, mock_jwt_encode):
     }, 201)
 
     incident = CreateIncidentRequest(
-        user_id=uuid4(),
-        company_id=uuid4(),
+        user_id=str(uuid4()),
+        company_id=str(uuid4()),
         description="Test incident",
         state="open",
         channel="phone",
