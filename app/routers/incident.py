@@ -68,10 +68,10 @@ def create_incident_in_database_user(incident_data: dict, token: str, file: Opti
 @router.post("/", response_model=CreateIncidentResponse, status_code=201)
 async def create_incident(
     incident: CreateIncidentRequest,
-    current_user: dict = Depends(get_current_user)
+    #current_user: dict = Depends(get_current_user)
 ):
-    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
-    response_data, status_code = create_incident_in_database(incident, token)
+    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    response_data, status_code = create_incident_in_database(incident, 'token')
 
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
