@@ -10,7 +10,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/incident-management", tags=["Incidents"])
 
-INCIDENT_SERVICE_COMMAND_URL = os.getenv("INCIDENT_SERVICE_COMMAND_URL", "http://localhost:8003/incident-command")
+INCIDENT_SERVICE_COMMAND_URL = os.getenv("INCIDENT_SERVICE_COMMAND_URL", "http://192.168.68.111:8003/incident-command")
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'secret_key')
 ALGORITHM = "HS256"
