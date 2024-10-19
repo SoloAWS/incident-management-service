@@ -10,7 +10,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/incident-management", tags=["Incidents"])
 
-INCIDENT_SERVICE_COMMAND_URL = os.getenv("INCIDENT_SERVICE_COMMAND_URL", "http://localhost:8003/incident-command-receptor")
+INCIDENT_SERVICE_COMMAND_URL = os.getenv("INCIDENT_SERVICE_COMMAND_URL", "http://localhost:8003/incident-command")
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'secret_key')
 ALGORITHM = "HS256"
@@ -24,14 +24,17 @@ def get_current_user(token: str = Header(None)):
     except jwt.PyJWTError:
         return None
 
-def create_incident_in_database(incident_data: dict, token: str):
+def create_incident_in_database(incident_data: CreateIncidentRequest, token: str):
     api_url = INCIDENT_SERVICE_COMMAND_URL
     endpoint = "/"
     headers = {
         "token": f"{token}",
         "Content-Type": "application/json"
     }
-    response = requests.post(f"{api_url}{endpoint}", headers=headers, json=incident_data)
+    
+    data = incident_data.model_dump_json()
+    
+    response = requests.post(f"{api_url}{endpoint}", headers=headers, data=data)
     return response.json(), response.status_code
 
 def create_incident_in_database_user(incident_data: dict, token: str, file: Optional[UploadFile] = None):
@@ -68,9 +71,8 @@ async def create_incident(
     current_user: dict = Depends(get_current_user)
 ):
     token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
-    incident_data = incident.dict()
-    response_data, status_code = create_incident_in_database(incident_data, token)
-    
+    response_data, status_code = create_incident_in_database(incident, token)
+
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
     
