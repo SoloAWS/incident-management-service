@@ -1,4 +1,5 @@
 # incident.py
+from fastapi import UploadFile, File
 from pydantic import BaseModel, Field
 from uuid import UUID
 from datetime import datetime
@@ -36,8 +37,8 @@ class IncidentsResponse(BaseModel):
     incidents: List[IncidentResponse]
 
 class CreateIncidentRequest(BaseModel):
-    user_id: UUID
-    company_id: UUID
+    user_id: str
+    company_id: str
     description: str
     state: IncidentState = Field(default=IncidentState.OPEN)
     channel: IncidentChannel
