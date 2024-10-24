@@ -27,7 +27,24 @@ class IncidentResponse(BaseModel):
     id: UUID
     description: str
     state: IncidentState
+    channel: IncidentChannel
+    priority: IncidentPriority
     creation_date: datetime
+    user_id: UUID
+    company_id: UUID
+    manager_id: UUID
+    
+class IncidentDetailResponse(BaseModel):
+    id: UUID
+    description: str
+    state: IncidentState
+    channel: IncidentChannel
+    priority: IncidentPriority
+    creation_date: datetime
+    user_id: UUID
+    company_id: UUID
+    company_name: Optional[str] = None
+    manager_id: Optional[UUID] = None
 
 class UserCompanyRequest(BaseModel):
     user_id: UUID
@@ -35,6 +52,9 @@ class UserCompanyRequest(BaseModel):
 
 class IncidentsResponse(BaseModel):
     incidents: List[IncidentResponse]
+    
+class IncidentsDetailResponse(BaseModel):
+    incidents: List[IncidentDetailResponse]
 
 class CreateIncidentRequest(BaseModel):
     user_id: str
