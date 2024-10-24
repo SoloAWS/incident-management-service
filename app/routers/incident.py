@@ -1,7 +1,7 @@
 # incident.py (router)
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Header, File, UploadFile, Form
-from ..schemas.incident import IncidentChannel, IncidentPriority, IncidentState, UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse, IncidentsDetailResponse, IncidentDetailResponse
+from ..schemas.incident import IncidentChannel, IncidentPriority, IncidentState, UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse, IncidentsDetailResponse, IncidentDetailResponse, UserDetailsResponse, ManagerDetailsResponse, IncidentDetailWithUsersResponse
 import jwt
 import requests
 import os
@@ -25,7 +25,20 @@ def get_current_user(token: str = Header(None)):
         return payload
     except jwt.PyJWTError:
         return None
+
+def get_item_by_id_from_database(token: str, id: str, api_url: str):
+    endpoint = f"/{id}"
+    headers = {
+        "token": f"{token}",
+        "Content-Type": "application/json"
+    }
     
+    try:
+        response = requests.get(f"{api_url}{endpoint}", headers=headers)
+        return response.json(), response.status_code
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to connect to {api_url} service: {str(e)}"}, 500
+  
 def get_incidents_from_database(token: str):
     api_url = QUERY_INCIDENT_SERVICE_URL
     endpoint = "/all-incidents"
@@ -182,3 +195,49 @@ async def get_incidents(
     
     
     return IncidentsDetailResponse(incidents=detailed_incidents)
+
+@router.get("/{incident_id}", response_model=IncidentDetailWithUsersResponse)
+async def get_incident_by_id(
+    incident_id: UUID,
+    #current_user: dict = Depends(get_current_user)
+):
+    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    
+    incident_data, status_code = get_item_by_id_from_database('token', str(incident_id), QUERY_INCIDENT_SERVICE_URL)
+    
+    if status_code != 200:
+        raise HTTPException(status_code=status_code, detail=incident_data)
+    
+    company_ids = [incident_data['company_id']]
+    companies_data, company_status_code = get_company_names_from_service('token', company_ids)
+    
+    company_name = "Unknown"
+    if company_status_code == 200:
+        company_names = {str(company['company_id']): company['name'] for company in companies_data}
+        company_name = company_names.get(str(incident_data['company_id']), "Unknown")
+    
+    user_data, user_status_code = get_item_by_id_from_database('token', incident_data['user_id'], f"{USER_SERVICE_URL}/user")
+    user_details = UserDetailsResponse(**user_data) if user_status_code == 200 else None
+    print(user_details)  
+    manager_details = None
+    if incident_data.get('manager_id'):
+        manager_data, manager_status_code = get_item_by_id_from_database('token', incident_data['manager_id'], f"{USER_SERVICE_URL}/manager")
+        if manager_status_code == 200:
+            manager_details = ManagerDetailsResponse(**manager_data)
+    
+    detailed_incident = IncidentDetailWithUsersResponse(
+        id=incident_data['id'],
+        description=incident_data['description'],
+        state=incident_data['state'],
+        channel=incident_data['channel'],
+        priority=incident_data['priority'],
+        creation_date=incident_data['creation_date'],
+        user_id=incident_data['user_id'],
+        user_details=user_details,
+        company_id=incident_data['company_id'],
+        company_name=company_name,
+        manager_id=incident_data.get('manager_id'),
+        manager_details=manager_details
+    )
+    
+    return detailed_incident
