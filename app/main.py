@@ -18,13 +18,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(incident.router)
-
-version = "1.0"
-
 @app.get("/incident-management/health")
 async def health():
     return {"status": "OK"}
+
+app.include_router(incident.router)
+
+version = "1.0"
 
 @app.exception_handler(ApiError)
 async def api_error_exception_handler(request: Request, exc: ApiError):
