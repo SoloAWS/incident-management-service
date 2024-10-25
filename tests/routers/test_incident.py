@@ -151,3 +151,15 @@ def test_get_current_user_valid_token():
         mock_decode.return_value = {'sub': 'test_user', 'user_type': 'manager'}
         user = get_current_user('valid_token')
         assert user == {'sub': 'test_user', 'user_type': 'manager'}
+
+def test_get_incidents_empty():
+    with patch('app.routers.incident.get_incidents_from_database') as mock_get_incidents:
+        mock_get_incidents.return_value = ([], 200)
+
+        response = client.get(
+            "/incident-management/all-incidents",
+            headers={"token": "test_token"}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"incidents": []}

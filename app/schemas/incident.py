@@ -27,7 +27,24 @@ class IncidentResponse(BaseModel):
     id: UUID
     description: str
     state: IncidentState
+    channel: IncidentChannel
+    priority: IncidentPriority
     creation_date: datetime
+    user_id: UUID
+    company_id: UUID
+    manager_id: UUID
+    
+class IncidentDetailResponse(BaseModel):
+    id: UUID
+    description: str
+    state: IncidentState
+    channel: IncidentChannel
+    priority: IncidentPriority
+    creation_date: datetime
+    user_id: UUID
+    company_id: UUID
+    company_name: Optional[str] = None
+    manager_id: Optional[UUID] = None
 
 class UserCompanyRequest(BaseModel):
     user_id: UUID
@@ -35,6 +52,9 @@ class UserCompanyRequest(BaseModel):
 
 class IncidentsResponse(BaseModel):
     incidents: List[IncidentResponse]
+    
+class IncidentsDetailResponse(BaseModel):
+    incidents: List[IncidentDetailResponse]
 
 class CreateIncidentRequest(BaseModel):
     user_id: str
@@ -53,4 +73,39 @@ class CreateIncidentResponse(BaseModel):
     channel: IncidentChannel
     priority: IncidentPriority
     creation_date: datetime
+    
+class UserDetailsResponse(BaseModel):
+    id: UUID
+    username: str
+    first_name: str
+    last_name: str
+    document_id: Optional[str] = None
+    document_type: Optional[str] = None
+    birth_date: Optional[str] = None
+    phone_number: Optional[str] = None
+    importance: Optional[int] = None
+    allow_call: Optional[bool] = None
+    allow_sms: Optional[bool] = None
+    allow_email: Optional[bool] = None
+    registration_date: datetime
+
+class ManagerDetailsResponse(BaseModel):
+    id: UUID
+    username: str
+    first_name: str
+    last_name: str
+
+class IncidentDetailWithUsersResponse(BaseModel):
+    id: UUID
+    description: str
+    state: IncidentState
+    channel: IncidentChannel
+    priority: IncidentPriority
+    creation_date: datetime
+    user_id: UUID
+    user_details: Optional[UserDetailsResponse] = None
+    company_id: UUID
+    company_name: Optional[str] = None
+    manager_id: Optional[UUID] = None
+    manager_details: Optional[ManagerDetailsResponse] = None
     
