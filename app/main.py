@@ -18,6 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/incident-management/protected")
+async def protected():
+    return {"status": "This endpoint is protected"}
+
 @app.get("/incident-management/health")
 async def health():
     return {"status": "OK"}
