@@ -35,6 +35,14 @@ def mock_jwt_encode():
         mock.return_value = 'mocked_token'
         yield mock
 
+def create_token():
+    token_data = {
+        "sub": str(str(uuid4())),
+        "user_type": "company"
+    }
+    return jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+
+
 def test_create_incident_success(mock_create_incident, mock_get_current_user, mock_jwt_encode):
     
     token_data = {
@@ -132,7 +140,7 @@ def test_get_incidents_empty():
 
         response = client.get(
             "/incident-management/all-incidents",
-            headers={"token": "test_token"}
+            headers={"token": create_token()}
         )
 
         assert response.status_code == 200
@@ -179,7 +187,7 @@ def test_get_incidents_success(mock_get_incidents, mock_get_company_names):
 
     response = client.get(
         "/incident-management/all-incidents",
-        headers={"token": "test_token"}
+        headers={"token": create_token()}
     )
 
     assert response.status_code == 200
@@ -204,7 +212,7 @@ def test_get_incidents_failed_company_lookup(mock_get_incidents, mock_get_compan
 
     response = client.get(
         "/incident-management/all-incidents",
-        headers={"token": "test_token"}
+        headers={"token": create_token()}
     )
 
     assert response.status_code == 200
@@ -238,7 +246,7 @@ def test_create_incident_user_success():
                 "priority": "medium"
             },
             files={"file": ("test.txt", b"test content", "text/plain")},
-            headers={"token": "test_token"}
+            headers={"token": create_token()}
         )
 
         assert response.status_code == 201

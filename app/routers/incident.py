@@ -115,10 +115,10 @@ def create_incident_in_database_user(incident_data: dict, token: str, file: Opti
 @router.post("/", response_model=CreateIncidentResponse, status_code=201)
 async def create_incident(
     incident: CreateIncidentRequest,
-    #current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
-    response_data, status_code = create_incident_in_database(incident, 'token')
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    response_data, status_code = create_incident_in_database(incident, token)
 
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
@@ -134,7 +134,7 @@ async def create_incident(
     channel: str = Form(IncidentChannel.MOBILE.value),
     priority: str = Form(IncidentPriority.MEDIUM.value),
     file: Optional[UploadFile] = File(None),
-    #current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
     incident_data = CreateIncidentRequest(
         user_id=user_id,
@@ -145,9 +145,9 @@ async def create_incident(
         priority=priority
     )
 
-    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
     
-    response_data, status_code = create_incident_in_database_user(incident_data.dict(), 'token', file)
+    response_data, status_code = create_incident_in_database_user(incident_data.dict(), token, file)
     
     if status_code != 201:
         raise HTTPException(status_code=status_code, detail=response_data)
@@ -157,10 +157,10 @@ async def create_incident(
 
 @router.get("/all-incidents", response_model=IncidentsDetailResponse)
 async def get_incidents(
-    #current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
-    response_data, status_code = get_incidents_from_database('token')
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    response_data, status_code = get_incidents_from_database(token)
 
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=response_data)
@@ -170,7 +170,7 @@ async def get_incidents(
     
     company_ids = list(set(incident['company_id'] for incident in response_data))
 
-    companies_data, company_status_code = get_company_names_from_service('token', company_ids)
+    companies_data, company_status_code = get_company_names_from_service(token, company_ids)
     
     if company_status_code != 200:
         company_names = {str(company_id): "Unknown" for company_id in company_ids}
@@ -199,29 +199,29 @@ async def get_incidents(
 @router.get("/{incident_id}", response_model=IncidentDetailWithUsersResponse)
 async def get_incident_by_id(
     incident_id: UUID,
-    #current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user)
 ):
-    #token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
     
-    incident_data, status_code = get_item_by_id_from_database('token', str(incident_id), QUERY_INCIDENT_SERVICE_URL)
+    incident_data, status_code = get_item_by_id_from_database(token, str(incident_id), QUERY_INCIDENT_SERVICE_URL)
     
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=incident_data)
     
     company_ids = [incident_data['company_id']]
-    companies_data, company_status_code = get_company_names_from_service('token', company_ids)
+    companies_data, company_status_code = get_company_names_from_service(token, company_ids)
     
     company_name = "Unknown"
     if company_status_code == 200:
         company_names = {str(company['company_id']): company['name'] for company in companies_data}
         company_name = company_names.get(str(incident_data['company_id']), "Unknown")
     
-    user_data, user_status_code = get_item_by_id_from_database('token', incident_data['user_id'], f"{USER_SERVICE_URL}/user")
+    user_data, user_status_code = get_item_by_id_from_database(token, incident_data['user_id'], f"{USER_SERVICE_URL}/user")
     user_details = UserDetailsResponse(**user_data) if user_status_code == 200 else None
     print(user_details)  
     manager_details = None
     if incident_data.get('manager_id'):
-        manager_data, manager_status_code = get_item_by_id_from_database('token', incident_data['manager_id'], f"{USER_SERVICE_URL}/manager")
+        manager_data, manager_status_code = get_item_by_id_from_database(token, incident_data['manager_id'], f"{USER_SERVICE_URL}/manager")
         if manager_status_code == 200:
             manager_details = ManagerDetailsResponse(**manager_data)
     
