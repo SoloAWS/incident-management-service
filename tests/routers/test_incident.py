@@ -140,7 +140,7 @@ def test_get_incidents_empty():
 
         response = client.get(
             "/incident-management/all-incidents",
-            headers={"token": create_token()}
+            headers={"authorization": create_token()}
         )
 
         assert response.status_code == 200
@@ -187,7 +187,7 @@ def test_get_incidents_success(mock_get_incidents, mock_get_company_names):
 
     response = client.get(
         "/incident-management/all-incidents",
-        headers={"token": create_token()}
+        headers={"authorization": create_token()}
     )
 
     assert response.status_code == 200
@@ -212,7 +212,7 @@ def test_get_incidents_failed_company_lookup(mock_get_incidents, mock_get_compan
 
     response = client.get(
         "/incident-management/all-incidents",
-        headers={"token": create_token()}
+        headers={"authorization": create_token()}
     )
 
     assert response.status_code == 200
@@ -246,7 +246,7 @@ def test_create_incident_user_success():
                 "priority": "medium"
             },
             files={"file": ("test.txt", b"test content", "text/plain")},
-            headers={"token": create_token()}
+            headers={"authorization": create_token()}
         )
 
         assert response.status_code == 201

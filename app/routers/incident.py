@@ -17,10 +17,11 @@ USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://192.168.68.111:8002/use
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'secret_key')
 ALGORITHM = "HS256"
 
-def get_current_user(token: str = Header(None)):
-    if token is None:
+def get_current_user(authorization: str = Header(None)):
+    if authorization is None:
         return None
     try:
+        token = authorization.replace('Bearer ', '') if authorization.startswith('Bearer ') else authorization
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.PyJWTError:
@@ -29,7 +30,7 @@ def get_current_user(token: str = Header(None)):
 def get_item_by_id_from_database(token: str, id: str, api_url: str):
     endpoint = f"/{id}"
     headers = {
-        "token": f"{token}",
+        "Authorization": f"{token}",
         "Content-Type": "application/json"
     }
     
@@ -43,7 +44,7 @@ def get_incidents_from_database(token: str):
     api_url = QUERY_INCIDENT_SERVICE_URL
     endpoint = "/all-incidents"
     headers = {
-        "token": f"{token}",
+        "Authorization": f"{token}",
         "Content-Type": "application/json"
     }
     
@@ -57,7 +58,7 @@ def get_company_names_from_service(token: str, company_ids: list):
     api_url = USER_SERVICE_URL
     endpoint = "/company/get-by-id"
     headers = {
-        "token": f"{token}",
+        "Authorization": f"{token}",
         "Content-Type": "application/json"
     }
     
@@ -75,7 +76,7 @@ def create_incident_in_database(incident_data: CreateIncidentRequest, token: str
     api_url = INCIDENT_SERVICE_COMMAND_URL
     endpoint = "/"
     headers = {
-        "token": f"{token}",
+        "Authorization": f"{token}",
         "Content-Type": "application/json"
     }
     
@@ -88,7 +89,7 @@ def create_incident_in_database_user(incident_data: dict, token: str, file: Opti
     api_url = INCIDENT_SERVICE_COMMAND_URL
     endpoint = "/user-incident"
     headers = {
-        "token": f"{token}",
+        "Authorization": f"{token}",
     }
     
      # Convert UUID to strings
