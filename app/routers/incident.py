@@ -113,7 +113,7 @@ def create_incident_in_database_user(incident_data: dict, token: str, file: Opti
     response = requests.post(f"{api_url}{endpoint}", headers=headers, data=form_data, files=files)
     return response.json(), response.status_code
 
-@router.post("/", response_model=CreateIncidentResponse, status_code=201)
+@router.post("/create", response_model=CreateIncidentResponse, status_code=201)
 async def create_incident(
     incident: CreateIncidentRequest,
     current_user: dict = Depends(get_current_user)
