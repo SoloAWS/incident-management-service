@@ -74,7 +74,7 @@ def test_create_incident_success(mock_create_incident, mock_get_current_user, mo
     }
 
     response = client.post(
-        "/incident-management/",
+        "/incident-management/create",
         json=request_data,
         headers={"token": token}
     )
@@ -90,7 +90,7 @@ def test_create_incident_failure(mock_create_incident, mock_get_current_user, mo
     mock_create_incident.return_value = ({"detail": "Error creating incident"}, 400)
 
     response = client.post(
-        "/incident-management/",
+        "/incident-management/create",
         json={
             "user_id": str(uuid4()),
             "company_id": str(uuid4()),
@@ -114,7 +114,7 @@ def test_create_incident_invalid_input():
     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
     
     response = client.post(
-        "/incident-management/",
+        "/incident-management/create",
         json={
             "company_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
             "description": "Sample incident description 4",
