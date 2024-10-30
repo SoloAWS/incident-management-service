@@ -94,6 +94,10 @@ class ManagerDetailsResponse(BaseModel):
     username: str
     first_name: str
     last_name: str
+    
+class IncidentHistory(BaseModel):
+    description: str
+    created_at: datetime
 
 class IncidentDetailWithUsersResponse(BaseModel):
     id: UUID
@@ -108,4 +112,5 @@ class IncidentDetailWithUsersResponse(BaseModel):
     company_name: Optional[str] = None
     manager_id: Optional[UUID] = None
     manager_details: Optional[ManagerDetailsResponse] = None
+    history: List[IncidentHistory] 
     

@@ -1,7 +1,7 @@
 # incident.py (router)
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Header, File, UploadFile, Form
-from ..schemas.incident import IncidentChannel, IncidentPriority, IncidentState, UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse, IncidentsDetailResponse, IncidentDetailResponse, UserDetailsResponse, ManagerDetailsResponse, IncidentDetailWithUsersResponse
+from ..schemas.incident import IncidentChannel, IncidentPriority, IncidentState, IncidentHistory, UserCompanyRequest, IncidentsResponse, CreateIncidentRequest, CreateIncidentResponse, IncidentsDetailResponse, IncidentDetailResponse, UserDetailsResponse, ManagerDetailsResponse, IncidentDetailWithUsersResponse
 import jwt
 import requests
 import os
@@ -218,12 +218,19 @@ async def get_incident_by_id(
     
     user_data, user_status_code = get_item_by_id_from_database(token, incident_data['user_id'], f"{USER_SERVICE_URL}/user")
     user_details = UserDetailsResponse(**user_data) if user_status_code == 200 else None
-    print(user_details)  
+    
     manager_details = None
     if incident_data.get('manager_id'):
         manager_data, manager_status_code = get_item_by_id_from_database(token, incident_data['manager_id'], f"{USER_SERVICE_URL}/manager")
         if manager_status_code == 200:
             manager_details = ManagerDetailsResponse(**manager_data)
+            
+    history_records = [
+        IncidentHistory(
+            description=record['description'],
+            created_at=record['created_at']
+        ) for record in incident_data.get('history', [])
+    ]
     
     detailed_incident = IncidentDetailWithUsersResponse(
         id=incident_data['id'],
@@ -237,7 +244,8 @@ async def get_incident_by_id(
         company_id=incident_data['company_id'],
         company_name=company_name,
         manager_id=incident_data.get('manager_id'),
-        manager_details=manager_details
+        manager_details=manager_details,
+        history=history_records
     )
     
     return detailed_incident
