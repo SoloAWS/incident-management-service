@@ -1,0 +1,15 @@
+# Caddyfile
+http://localhost {
+    route /incident-management/* {
+        reverse_proxy host.docker.internal:8000
+    }
+
+    route /report-generation/* {
+        reverse_proxy host.docker.internal:8009
+    }
+
+    # Add more routes as needed, example:
+    # route /another-service/* {
+    #     reverse_proxy host.docker.internal:8001
+    # }
+}
