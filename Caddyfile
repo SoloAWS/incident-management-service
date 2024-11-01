@@ -4,10 +4,14 @@ http://localhost {
         reverse_proxy host.docker.internal:8000
     }
 
+    route /auth/* {
+        reverse_proxy host.docker.internal:8008
+    }
+
     route /report-generation/* {
         reverse_proxy host.docker.internal:8009
     }
-
+    
     # Add more routes as needed, example:
     # route /another-service/* {
     #     reverse_proxy host.docker.internal:8001
