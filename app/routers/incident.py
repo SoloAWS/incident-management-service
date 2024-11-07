@@ -211,6 +211,46 @@ async def get_incidents(
     
     return IncidentsDetailResponse(incidents=detailed_incidents)
 
+@router.get("/incidents-user", response_model=IncidentsUserListResponse)
+async def get_user_incidents_summary(
+    current_user: dict = Depends(get_current_user)
+):
+    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
+    
+    incidents_data, status_code = get_user_incidents_from_database(token)
+    
+    if status_code != 200:
+        raise HTTPException(status_code=status_code, detail=incidents_data)
+    
+    if not incidents_data:
+        return IncidentsUserListResponse(incidents=[])
+    
+    company_ids = list(set(incident['company_id'] for incident in incidents_data))
+    
+    companies_data, company_status_code = get_company_names_from_service(token, company_ids)
+    
+    company_names = {}
+    if company_status_code == 200:
+        company_names = {
+            str(company['company_id']): company['name'] 
+            for company in companies_data
+        }
+    
+    incidents_summary = []
+    for incident in incidents_data:
+        company_name = company_names.get(str(incident['company_id']), "Unknown")
+        
+        incident_summary = IncidentUserResponse(
+            creation_date=incident['creation_date'],
+            state=incident['state'],
+            priority=incident['priority'],
+            description=incident['description'],
+            company_name=company_name
+        )
+        incidents_summary.append(incident_summary)
+    
+    return IncidentsUserListResponse(incidents=incidents_summary)
+
 @router.get("/{incident_id}", response_model=IncidentDetailWithUsersResponse)
 async def get_incident_by_id(
     incident_id: UUID,
@@ -264,43 +304,3 @@ async def get_incident_by_id(
     )
     
     return detailed_incident
-
-@router.get("/incidents-user", response_model=IncidentsUserListResponse)
-async def get_user_incidents_summary(
-    current_user: dict = Depends(get_current_user)
-):
-    token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
-    
-    incidents_data, status_code = get_user_incidents_from_database(token)
-    
-    if status_code != 200:
-        raise HTTPException(status_code=status_code, detail=incidents_data)
-    
-    if not incidents_data:
-        return IncidentsUserListResponse(incidents=[])
-    
-    company_ids = list(set(incident['company_id'] for incident in incidents_data))
-    
-    companies_data, company_status_code = get_company_names_from_service(token, company_ids)
-    
-    company_names = {}
-    if company_status_code == 200:
-        company_names = {
-            str(company['company_id']): company['name'] 
-            for company in companies_data
-        }
-    
-    incidents_summary = []
-    for incident in incidents_data:
-        company_name = company_names.get(str(incident['company_id']), "Unknown")
-        
-        incident_summary = IncidentUserResponse(
-            creation_date=incident['creation_date'],
-            state=incident['state'],
-            priority=incident['priority'],
-            description=incident['description'],
-            company_name=company_name
-        )
-        incidents_summary.append(incident_summary)
-    
-    return IncidentsUserListResponse(incidents=incidents_summary)
