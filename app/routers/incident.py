@@ -218,17 +218,16 @@ async def get_user_incidents_summary(
     token = jwt.encode(current_user, SECRET_KEY, algorithm=ALGORITHM)
     
     incidents_data, status_code = get_user_incidents_from_database(token)
-    
     if status_code != 200:
         raise HTTPException(status_code=status_code, detail=incidents_data)
     
     if not incidents_data:
         return IncidentsUserListResponse(incidents=[])
     
-    company_ids = list(set(incident['company_id'] for incident in incidents_data))
+    print(incidents_data)
+    company_ids = list(set(incident['company_id'] for incident in incidents_data['incidents']))
     
     companies_data, company_status_code = get_company_names_from_service(token, company_ids)
-    
     company_names = {}
     if company_status_code == 200:
         company_names = {
@@ -237,7 +236,7 @@ async def get_user_incidents_summary(
         }
     
     incidents_summary = []
-    for incident in incidents_data:
+    for incident in incidents_data['incidents']:
         company_name = company_names.get(str(incident['company_id']), "Unknown")
         
         incident_summary = IncidentUserResponse(
