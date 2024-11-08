@@ -114,3 +114,12 @@ class IncidentDetailWithUsersResponse(BaseModel):
     manager_details: Optional[ManagerDetailsResponse] = None
     history: List[IncidentHistory] 
     
+class IncidentUserResponse(BaseModel):
+    creation_date: datetime
+    state: IncidentState
+    priority: IncidentPriority
+    description: str
+    company_name: str
+
+class IncidentsUserListResponse(BaseModel):
+    incidents: List[IncidentUserResponse]
