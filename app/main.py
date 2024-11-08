@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import incident
+from .routers import incident, manager_router
 from .errors.errors import ApiError
 
 app = FastAPI()
@@ -27,6 +27,7 @@ async def health():
     return {"status": "OK"}
 
 app.include_router(incident.router)
+app.include_router(manager_router.router)
 
 version = "1.0"
 
