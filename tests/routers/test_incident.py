@@ -313,7 +313,7 @@ def test_get_user_incidents_summary_service_error(mock_get_current_user, mock_jw
             headers={"authorization": create_token()}
         )
 
-        assert response.status_code == 400
+        assert response.status_code == 500
         
 def test_get_incidents_success_with_all_fields(mock_get_incidents, mock_get_company_names):
     # Mock incident data with all fields
